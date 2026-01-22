@@ -1,0 +1,59 @@
+{
+  "manifest_version": 3,
+  "name": "Professional English Assistant",
+  "version": "1.0.0",
+  "description": "AI-powered writing assistant for professional English, grammar enhancement, and tone detection",
+  "permissions": [
+    "storage", 
+    "activeTab",
+    "scripting",
+    "contextMenus"
+  ],
+  "host_permissions": [
+    "https://*/*",
+    "http://*/*"
+  ],
+  "action": {
+    "default_popup": "index.html"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "js": ["src/content.tsx"],
+      "matches": ["<all_urls>"],
+      "all_frames": true,
+      "run_at": "document_end"
+    }
+  ],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "commands": {
+    "apply-suggestion": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+A",
+        "mac": "Command+Shift+A"
+      },
+      "description": "Apply first suggestion"
+    },
+    "toggle-assistant": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+E",
+        "mac": "Command+Shift+E"
+      },
+      "description": "Toggle writing assistant"
+    },
+    "toggle-panel": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+F",
+        "mac": "Command+Shift+F"
+      },
+      "description": "Toggle suggestion panel"
+    }
+  }
+}
