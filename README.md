@@ -1,4 +1,4 @@
-# Grammerly ✍️
+# Grammy ✍️
 
 > An AI-powered writing assistant browser extension with real-time grammar corrections, tone adjustment, and smart paraphrasing. Backed by a Next.js web platform with user auth and a credit system.
 
