@@ -1,4 +1,4 @@
-# Grammy ✍️
+# Grammerly ✍️
 
 > An AI-powered writing assistant browser extension with real-time grammar corrections, tone adjustment, and smart paraphrasing. Backed by a Next.js web platform with user auth and a credit system.
 
@@ -27,7 +27,7 @@ Grammerly is a professional writing assistant that works across any website with
 - **Floating Icon**: Grammarly-style icon appears when you focus an input field
 - **Draggable Panel**: Click and drag the suggestion panel anywhere on screen
 - **AI Suggestions**: Powered by Groq (Llama 3.1 8B) — fixes grammar, spelling, and clarity
-- **4 Alternatives**: Returns 4 improved versions of your text per request
+- **Up to 4 Alternatives**: Returns up to 4 improved versions of your text per request
 - **6 Tone Presets**: Default, Friendly 😊, Formal 👔, Professional 💼, Casual 😎, Confident 💪
 - **Keyboard Shortcuts**:
   - `Ctrl+Shift+G` — Apply first suggestion instantly
@@ -54,7 +54,7 @@ Grammerly is a professional writing assistant that works across any website with
 
 ---
 
-## � Setup
+## 🛠️ Setup
 
 ### Prerequisites
 - Node.js 20+, pnpm, PostgreSQL, Groq API key, Chrome/Edge browser
