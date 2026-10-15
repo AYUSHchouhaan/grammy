@@ -1,6 +1,6 @@
 # Grammy ✍️
 
-> An AI-powered writing assistant browser extension with real-time grammar corrections, tone adjustment, and smart paraphrasing. Backed by a Next.js web platform with user auth and a credit system.
+> An AI-powered writing assistant browser extension built with React, TypeScript, Vite, and the Groq SDK. Grammy adds writing suggestions to browser pages with editable text fields.
 
 <p align="center">
   <img src="https://img.shields.io/badge/Chrome_Extension-Manifest_V3-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Chrome Extension">
@@ -16,7 +16,9 @@
 
 ## 🚀 Overview
 
-Grammerly is a professional writing assistant that works across any website with input fields. As you type, it provides real-time AI-powered suggestions to fix grammar, improve clarity, and adjust tone — powered by Groq AI.
+Grammy is a Manifest V3 browser-extension prototype. Its content script detects editable fields, mounts the writing-assistant UI, and uses Groq to generate improved versions of the selected text. The extension is intentionally lightweight: the browser-facing experience lives in `src/content`, while Vite provides the development and production build workflow.
+
+> **Current scope:** this checkout contains the browser extension only. The previously documented Next.js web platform is not part of this repository, so web-platform setup and deployment instructions are intentionally omitted.
 
 ---
 
@@ -34,12 +36,6 @@ Grammerly is a professional writing assistant that works across any website with
   - `Ctrl+Shift+E` — Toggle assistant on/off
   - `Ctrl+Shift+A` — Apply suggestion shortcut
 
-### 🌐 Web Platform
-- **NextAuth Authentication**: JWT-based credential login with bcrypt password hashing
-- **Credit System**: 50 free credits on signup; 1 credit deducted per AI request
-- **User Dashboard**: View credit balance, account info, and usage stats
-- **Extension API**: Endpoints for auth verification, credit checks, and deductions
-- **PostgreSQL + Drizzle ORM**: Type-safe schema with UUID keys, timestamps, and migrations
 
 ---
 
@@ -48,136 +44,108 @@ Grammerly is a professional writing assistant that works across any website with
 | Layer | Technologies |
 |---|---|
 | Extension | React 19, TypeScript 5, Vite 5, Tailwind CSS 4, @crxjs/vite-plugin |
-| Web Platform | Next.js 16, NextAuth 4.24, Drizzle ORM, PostgreSQL |
-| AI | Groq SDK, Llama 3.1 8B Instant |
-| Auth & DB | bcryptjs, JWT, UUID, pg |
+| AI integration | Groq SDK |
+| Build tooling | Vite 5, TypeScript 5, ESLint |
 
 ---
 
-## � Setup
+## 🛠️ Setup
 
 ### Prerequisites
-- Node.js 20+, pnpm, PostgreSQL, Groq API key, Chrome/Edge browser
 
-### 1. Web Platform
+- Node.js 20 or newer
+- npm (or another package manager compatible with the lockfile, if present)
+- Chrome or another Chromium browser for loading the unpacked extension
+- A Groq API key for AI suggestions
 
-```bash
-cd grammerly-website/grammy
-pnpm install
-```
-
-Create `.env.local`:
-```env
-DATABASE_URL=postgresql://user:password@localhost:5432/grammerly
-NEXTAUTH_SECRET=your-random-secret-key-min-32-characters
-NEXTAUTH_URL=http://localhost:3000
-```
+### Install dependencies
 
 ```bash
-pnpm db:generate
-pnpm db:migrate
-pnpm dev          # http://localhost:3000
+npm install
 ```
 
-### 2. Browser Extension
+### Configure Groq
 
-```bash
-cd grammerly
-pnpm install
-```
+Create a `.env` file in the repository root:
 
-Create `.env`:
 ```env
 VITE_GROQ_API_KEY=your-groq-api-key
 ```
 
+Do not commit `.env` or expose a production API key in a public extension. A browser extension can expose client-side environment values; use a server-side proxy before distributing this beyond local testing.
+
+### Start development
+
 ```bash
-pnpm build
+npm run dev
 ```
 
-**Load in Chrome:**
-1. Go to `chrome://extensions/`
-2. Enable **Developer mode**
-3. Click **Load unpacked** → select `grammerly/dist/`
+Vite prints the local development URL. The regular development page is useful for iterating on React components; extension behavior is tested by loading a production-style build into the browser.
 
----
+### Build the extension
 
-## 🔑 Environment Variables
+```bash
+npm run build:manual
+```
 
-| Variable | Location | Description |
+This runs TypeScript/Vite build steps and copies the manifest, service worker, and icons into `dist/`.
+
+### Load in Chrome
+
+1. Open `chrome://extensions/`.
+2. Enable **Developer mode**.
+3. Choose **Load unpacked**.
+4. Select the generated `dist/` directory.
+5. Open a page containing an input, textarea, or editable element and refresh it after rebuilding.
+
+The `npm run build` command creates the Vite output. Use `npm run build:manual` when you need the additional extension files copied into `dist/`.
+
+
+## 🔑 Environment variables
+
+| Variable | File | Purpose |
 |---|---|---|
-| `VITE_GROQ_API_KEY` | `grammerly/.env` | Groq API key — [console.groq.com](https://console.groq.com/keys) |
-| `DATABASE_URL` | `grammy/.env.local` | PostgreSQL connection string |
-| `NEXTAUTH_SECRET` | `grammy/.env.local` | Random secret (min 32 chars) |
-| `NEXTAUTH_URL` | `grammy/.env.local` | App URL (e.g. `http://localhost:3000`) |
+| `VITE_GROQ_API_KEY` | `.env` | Groq API key used by the client-side service during local development |
+
+Get a key from the [Groq console](https://console.groq.com/keys). Keep local environment files out of version control.
 
 ---
 
-## 📁 Project Structure
+## 📁 Project structure
 
+```text
+.
+├── manifest.json                 # Manifest V3 extension definition
+├── vite.config.ts                # Vite and CRXJS configuration
+├── public/icons/                 # Extension icons copied to dist/
+├── src/
+│   ├── main.tsx                  # React development entry point
+│   ├── content.tsx               # Content-script entry point
+│   ├── background.js             # Extension service worker
+│   └── content/
+│       ├── EnhancedWritingAssistant.tsx
+│       ├── components/            # Floating icon and suggestion panel
+│       ├── hooks/                 # Assistant state and interactions
+│       ├── services/              # Groq API integration
+│       └── types.ts
+└── dist/                         # Generated build output (not source)
 ```
-grammerly-clone/
-├── grammerly/                    # Browser Extension
-│   ├── manifest.json            # Chrome Manifest V3
-│   ├── vite.config.ts           # Vite + CRXJS config
-│   └── src/
-│       ├── content.tsx          # Content script entry
-│       ├── background.js        # Service worker
-│       └── content/
-│           ├── EnhancedWritingAssistant.tsx
-│           ├── types.ts
-│           ├── components/
-│           │   ├── GrammarlyIcon.tsx
-│           │   └── SuggestionPanel.tsx
-│           ├── hooks/
-│           │   └── useWritingAssistant.ts
-│           └── services/
-│               └── groqService.ts
-│
-└── grammerly-website/grammy/    # Web Platform
-    ├── app/
-    │   ├── api/
-    │   │   ├── auth/[...nextauth]/route.ts
-    │   │   ├── auth/signup/route.ts
-    │   │   ├── extension/auth/verify/
-    │   │   ├── extension/credits/check/
-    │   │   ├── extension/credits/deduct/
-    │   │   └── user/credits/route.ts
-    │   ├── auth/signin/page.tsx
-    │   ├── auth/signup/page.tsx
-    │   └── dashboard/page.tsx
-    ├── db/
-    │   ├── schema.ts
-    │   ├── queries.ts
-    │   └── migrations/
-    └── lib/auth.ts
-```
+
+See [`src/content/README.md`](src/content/README.md) for the content-script data flow and extension-specific development notes.
 
 ---
 
-## 🚀 Deployment
+## 📦 Packaging and deployment
 
-### Extension → Chrome Web Store
-```bash
-cd grammerly
-pnpm build          # outputs dist/
-```
-1. Zip the `dist/` folder
-2. Go to [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)
-3. Upload zip → fill listing details → submit for review
+For local testing, `npm run build:manual` creates the unpacked extension in `dist/`. Before publishing, review the generated manifest, permissions, content-script matches, and API-key handling. Zip the contents of `dist/` and upload the archive through the [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole).
 
-### Web Platform → Vercel
-```bash
-cd grammerly-website/grammy
-vercel
-```
-Set `DATABASE_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL` in the Vercel dashboard, then run `pnpm db:push`.
+Because the Groq key is referenced by a browser-facing build, do not treat the current client-side integration as suitable for a public release without adding a protected backend proxy and usage controls.
 
 ---
 
 ## 🗺️ Roadmap
 
-- [ ] Firefox / chrome extension support
+- [ ] Firefox support
 - [ ] Plagiarism detection
 - [ ] Writing analytics dashboard
 <!-- - [ ] Premium subscription tiers -->
